@@ -1,24 +1,32 @@
-'''
 pipeline {
     agent any
-
     tools {
-        jdk 'JDK'
         maven 'MAV'
+        jdk 'JDK'
     }
-
     stages {
-        stage('Checkout') {
+        stage('Setup') {
             steps {
-                checkout scm
-            }
-        }
-        
-        stage('Build') {
-            steps {
-                sh 'mvn clean install'
+                script {
+                    def buildConfigurations = [
+                        [repo: 'https://github.com/user/repo1.git', branch: 'branch1', name: 'repo1-branch1'],
+                        [repo: 'https://github.com/user/repo2.git', branch: 'branch2', name: 'repo2-branch2']
+                    ]
+
+                    for (config in buildConfigurations) {
+                        buildRepoBranch(config.repo, config.branch, config.name)
+                    }
+                }
             }
         }
     }
 }
-'''
+
+def buildRepoBranch(String repoUrl, String branch, String stageName) {
+    stage("Building ${stageName}") {
+        steps {
+            checkout([$class: 'GitSCM', branches: [[name: branch]], userRemoteConfigs: [[url: repoUrl]]])
+            sh 'mvn clean install'
+        }
+    }
+}
