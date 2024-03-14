@@ -20,10 +20,12 @@ node {
         // modify stage name
         String stageName = "building ${repoName} on branch ${config.branch}"
         
+        //print and checkout current repo-branch being built
         stage(stageName) {
             echo "Checkout ${config.repo} on branch ${config.branch}"
             git branch: config.branch, url: config.repo
             
+            //run maven build command
             echo "Run mvn clean install"
             sh "mvn clean install"
         }
